@@ -26,20 +26,23 @@ struct ContentView: View {
                 if loading {
                     ProgressView()
                 }
-                ScrollView {
-                    VStack(spacing: 0) {
-                        if dataVideo != nil {
-                            videoView
-                        }
-                        ForEach(resultVideo, id: \.trackId) {item in
-                            Button {
-                                dataVideo = item
-                                videoPlay()
-                            } label: {
-                                cell(data: item)
+                VStack(spacing: 0) {
+                    if dataVideo != nil {
+                        videoView
+                    }
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            
+                            ForEach(resultVideo, id: \.trackId) {item in
+                                Button {
+                                    dataVideo = item
+                                    videoPlay()
+                                } label: {
+                                    cell(data: item)
+                                }
+                                .background(item.trackId == dataVideo?.trackId ? Color.black.opacity(0.1) : Color.clear)
+                                Divider()
                             }
-                            .background(item.trackId == dataVideo?.trackId ? Color.black.opacity(0.1) : Color.clear)
-                            Divider()
                         }
                     }
                 }
