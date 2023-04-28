@@ -10,43 +10,64 @@ import AVKit
 
 struct ContentView: View {
     
+    @ObservedObject var mainVM: VideoPlayerVM
     @State private var player : AVPlayer?
     @StateObject var viewModel = ContentVM()
     @State var loading = false
     @State var resultVideo: [ResultResponse] = []
     @State var dataVideo: ResultResponse? = nil
     
+    @Environment(\.horizontalSizeClass) var wSizeClass
+    
     var body: some View {
-        ZStack {
-            logic
-            if loading {
-                ProgressView()
-            }
-            ScrollView {
-                if dataVideo != nil {
-                    videoView
+        GeometryReader { geo in
+            ZStack {
+                logic
+                if loading {
+                    ProgressView()
                 }
-                ForEach(resultVideo, id: \.trackId) {item in
-                    Button {
-                        dataVideo = item
-                        videoPlay()
-                    } label: {
-                        cell(data: item)
+                ScrollView {
+                    VStack(spacing: 0) {
+                        if dataVideo != nil {
+                            videoView
+                        }
+                        ForEach(resultVideo, id: \.trackId) {item in
+                            Button {
+                                dataVideo = item
+                                videoPlay()
+                            } label: {
+                                cell(data: item)
+                            }
+                            .background(item.trackId == dataVideo?.trackId ? Color.black.opacity(0.1) : Color.clear)
+                            Divider()
+                        }
                     }
-                    Divider()
+                }
+                .onAppear {
+                    AppDelegate.orientation = UIInterfaceOrientationMask.portrait
+                    self.mainVM.setNeedsUpdateOfSupportedInterfaceOrientations()
+                    viewModel.fetchSearch(query: "jack+johnson")
                 }
             }
-            .onAppear {
-                viewModel.fetchSearch(query: "jack+johnson")
-            }
+            .frame(width: geo.size.width, height: geo.size.height)
         }
         .edgesIgnoringSafeArea(.bottom)
     }
     
     var videoView: some View {
-        ZStack{
+        ZStack(alignment: .topLeading) {
             VideoPlayer(player: player)
-                .frame(width: UIScreen.main.bounds.width , height: 200 )
+                .frame(width: UIScreen.main.bounds.width, height: 200 )
+            Image(systemName: "viewfinder")
+                .resizable()
+                .frame(width: 24, height: 24)
+                .foregroundColor(.orange)
+                .padding()
+                .onTapGesture {
+                    mainVM.dataVideo = self.dataVideo
+                    mainVM.path.append(VideoFullView.path)
+                    player?.pause()
+                }
         }
     }
     
@@ -80,7 +101,7 @@ struct ContentView: View {
             Spacer()
         }
         .padding(.horizontal)
-        .padding(.vertical, 4)
+        .padding(.vertical, 12)
     }
     
     var logic: some View {
@@ -108,6 +129,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(mainVM: VideoPlayerVM())
     }
 }

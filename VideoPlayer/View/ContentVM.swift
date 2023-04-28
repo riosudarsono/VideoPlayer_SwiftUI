@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 class ContentVM: ObservableObject {
     @Published var resultSearch: ResultState<[ResultResponse]> = ._init
@@ -26,4 +27,5 @@ class ContentVM: ObservableObject {
             }
         }
     }
+    
 }
